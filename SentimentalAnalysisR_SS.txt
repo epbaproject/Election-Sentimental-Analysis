@@ -1,0 +1,58 @@
+install.packages('tidyverse')
+library(rtweet)
+library(httr)
+library(tidyverse)
+
+## app name from api set-up
+appname <- **************
+key <- "**********************"
+secret <- "**************************************"
+
+# create token named "twitter_token"
+twitter_token <- rtweet::create_token(app = appname,
+                                      consumer_key = key,
+                                      consumer_secret = secret)
+
+
+## search for 18000 tweets using the rstats hashtag
+rt <- rtweet::search_tweets(
+  "#generalelections", n = 1000, include_rts = FALSE
+)
+
+## preview tweets data
+rt %>% dplyr::glimpse(78)
+
+users_data(rt) %>% dplyr::glimpse(78)
+
+############################Sentiment Analysis done from here#########################################
+tweets.df <- as.data.frame(rt)
+
+head(tweets.df$text)
+
+tweets.df2 <- gsub("http.*","",tweets.df$text)
+
+tweets.df2 <- gsub("https.*","",tweets.df2)
+
+tweets.df2 <- gsub("#.*","",tweets.df2)
+
+tweets.df2 <- gsub("@.*","",tweets.df2)
+
+head(tweets.df2)
+
+word.df <- as.vector(tweets.df2)
+
+emotion.df <- get_nrc_sentiment(word.df)
+
+emotion.df2 <- cbind(tweets.df2, emotion.df)
+
+head(emotion.df2)
+
+sent.value <- get_sentiment(word.df)
+
+category_senti <- ifelse(sent.value < 0, "Negative", ifelse(sent.value > 0, "Positive", "Neutral"))
+head(category_senti)
+
+table(category_senti)
+
+## plot time series (if ggplot2 is installed)
+#use ts_plot
