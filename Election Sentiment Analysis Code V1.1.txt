@@ -29,8 +29,8 @@ download.file(url="http://curl.haxx.se/ca/cacert.pem", destfile="cacert.pem")
 
 #======== Creating an Object cred with all the keys stored ===========#
 
-cred <- OAuthFactory$new(consumerKey='5rPPwqLkG81BY2HBMcU55FMim',
-                         consumerSecret='FR2iyfPDU5wuv5C7hflZvupMlyxbp8JjvQwWconEE3fwCufjBf',
+cred <- OAuthFactory$new(consumerKey='***********************************',
+                         consumerSecret='****************************************',
                          requestURL='https://api.twitter.com/oauth/request_token',
                          accessURL='https://api.twitter.com/oauth/access_token',
                          authURL='https://api.twitter.com/oauth/authorize')
@@ -41,9 +41,9 @@ cred$handshake(cainfo="cacert.pem")  ## This is to establish connection with twi
 
 save(cred, file="twitter authentication.Rdata")
 
-appname <- "Calc_App"
-accessToken  <-  "140712675-tpZKZ1v3IAZUENWfOruBcg4vFGo7vXNhHPgkHiNA"
-accessTokenSecret  <-  "ZMBlyu5d3S6Gd7KhXk3tEXCfafKcR05qLob6qF6qZqSjN"
+appname <- "*********"
+accessToken  <-  "*****************************************"
+accessTokenSecret  <-  "****************************************"
 
 #================ Way to authenticate your Keys in R  ==============#
 
