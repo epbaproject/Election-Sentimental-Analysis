@@ -1,0 +1,105 @@
+#======================== Installing Necessary Packages ====================#
+
+install.packages("twitteR", dependencies = TRUE)
+install.packages("ROAuth", dependencies = TRUE)
+install.packages("tidyverse", dependencies = TRUE)
+install.packages("rtweet", dependencies = TRUE)
+install.packages("base64enc", dependencies = TRUE)
+install.packages("syuzhet", dependencies = TRUE)
+library(syuzhet)
+library(base64enc)
+library(rtweet)
+library(httr)
+library(tidyverse)
+library(dplyr)
+library(purrr)
+library(twitteR)
+library(ROAuth)
+library(openssl)
+library(httpuv)
+library(plotly)
+
+#======================= Download "cacer.pem" file ======================#
+
+
+options(download.file.method="libcurl")  #  This is to set the default downoad method to "libcurl"
+
+download.file(url="http://curl.haxx.se/ca/cacert.pem", destfile="cacert.pem")
+
+
+#======== Creating an Object cred with all the keys stored ===========#
+
+cred <- OAuthFactory$new(consumerKey='5rPPwqLkG81BY2HBMcU55FMim',
+                         consumerSecret='FR2iyfPDU5wuv5C7hflZvupMlyxbp8JjvQwWconEE3fwCufjBf',
+                         requestURL='https://api.twitter.com/oauth/request_token',
+                         accessURL='https://api.twitter.com/oauth/access_token',
+                         authURL='https://api.twitter.com/oauth/authorize')
+
+cred$handshake(cainfo="cacert.pem")  ## This is to establish connection with twitter
+
+#================ Save the object cred =============================#
+
+save(cred, file="twitter authentication.Rdata")
+
+appname <- "Calc_App"
+accessToken  <-  "140712675-tpZKZ1v3IAZUENWfOruBcg4vFGo7vXNhHPgkHiNA"
+accessTokenSecret  <-  "ZMBlyu5d3S6Gd7KhXk3tEXCfafKcR05qLob6qF6qZqSjN"
+
+#================ Way to authenticate your Keys in R  ==============#
+
+options(httr_oauth_cache=T)
+
+setup_twitter_oauth(consumerKey,
+                    consumerSecret,
+                    accessToken,
+                    accessTokenSecret)
+
+#===================================================================#
+
+load("twitter authentication.Rdata")
+
+search.string <- "swachh bharat abhiyan"
+no.of.tweets <- 40
+since <- "2016-01-01"
+until <- "2019-01-01"
+
+Policies.Tweets <- searchTwitter(search.string, 
+                              n=no.of.tweets,
+                              lang="en")
+
+Pure.tweets <- strip_retweets(Policies.Tweets, strip_manual = TRUE, strip_mt = TRUE)
+
+df <- do.call("rbind", lapply(Pure.tweets, as.data.frame))
+
+View(df)
+
+head(df$text)
+
+dfTweets <- gsub("http.*","",df$text)
+dfTweets <- gsub("https.*","",dfTweets)
+dfTweets <- gsub("#*","",dfTweets)
+dfTweets <- gsub("@*","",dfTweets)
+
+view(dfTweets)
+
+word.df <- as.vector(dfTweets)
+
+emotion.df <- get_nrc_sentiment(word.df)
+
+emotion.df2 <- cbind(dfTweets, emotion.df)
+
+head(emotion.df2, 10)
+
+sent.value <- get_sentiment(word.df)
+
+category_senti <- ifelse(sent.value < 0, "Negative", ifelse(sent.value > 0, "Positive", "Neutral"))
+head(category_senti)
+
+table(category_senti)
+
+p <- plot_ly(emotion.df2, x=~emotion, y=~count, type="bar", color=~emotion) %>%
+  layout(xaxis=list(title=""), showlegend=FALSE,
+         title="Emotion Type for Policies")
+
+
+write.csv(dfTweets, "Tweets.csv")
